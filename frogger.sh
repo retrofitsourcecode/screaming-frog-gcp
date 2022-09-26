@@ -31,6 +31,7 @@ Help()
 URL="https://www.theretrofitsource.com/"
 OUTPUTARG="$HOME/crawl-data/"
 PROJECT="screamingfrog"
+BACKUPDEST="gs://dlg-frogger/"
 SCREAMINGFROGCONFIGPATH=""
 SHUTDOWNONCOMPLETE=0
 CLEANUP=0
@@ -80,7 +81,7 @@ if [[ $SCREAMINGFROGCONFIGPATH != "" ]]; then
     CONFIGARG=( --config "${SCREAMINGFROGCONFIGPATH}" )
 fi
 
-TIMESTAMP=$(date +%F_%R)
+TIMESTAMP=$(date +%F_%H.%M)
 echo "timestamp: $TIMESTAMP"
 
 OUTPUTPARENTDIR="$OUTPUTARG/$TIMESTAMP/"
@@ -109,7 +110,7 @@ screamingfrogseospider --headless --save-crawl --timestamped-output --create-sit
 if [[ $ZIPRESULTS -eq 1 ]]; then
     echo "Compressing results..."
     ZIPPATH=${OUTPUTDIR#$OUTPUTPARENTDIR}
-    ZIPOUTPUT="$OUTPUTPARENTDIR/$PROJECT_$TIMESTAMP.tar.gz"
+    ZIPOUTPUT="$OUTPUTPARENTDIR/${PROJECT}_${TIMESTAMP}.tar.gz"
     tar -cvzf "$ZIPOUTPUT" -C "$OUTPUTPARENTDIR" "$ZIPPATH"
     ZIPSTATUS=$?
     if [[ $ZIPSTATUS -ne 0 ]]; then
@@ -126,7 +127,7 @@ if [[ $ZIPRESULTS -eq 1 ]]; then
 fi
 
 echo "Copying Screaming Frog data at $TOCOPY to GCP bucket..."
-gsutil cp -r "$TOCOPY" gs://dlg-frogger/
+gsutil cp -r "$TOCOPY" "$BACKUPDEST"
 
 BUCKETCPSTATUS=$?
 
